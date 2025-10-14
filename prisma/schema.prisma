@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User{
+  id            String          @id @default(uuid())
+  clerkUserId   String          @unique
+  email         String          @unique
+  name          String?         
+  imageUrl      String?
+  phone         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  role          UserRole        @default(USER)
+  savedCars     UserSavedCars[]
+  testDrives    TestDriveBooking[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model Car{
+  id                    String          @id @default(uuid())
+  make                  String
+  model                 String
+  year                  Int
+  price                 Decimal         @db.Decimal(10,2)
+  mileage               Int
+  color                 String
+  fuelType              String
+  transmission          String
+  bodyType              String
+  seats                 Int?
+  description           String
+  status                CarStatus       @default(AVAILABLE)
+  featured              Boolean         @default(false)
+  images                String[]        // images were stored in the supa base and this will store the urls of the images
+  savedBy               UserSavedCars[]
+  testDriveBookings     TestDriveBooking[]
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  @@index([make, model])
+  @@index([bodyType])
+  @@index([price])
+  @@index([year])
+  @@index([status])
+  @@index([fuelType])
+  @@index([featured])
+}
+
+enum CarStatus {
+  AVAILABLE
+  UNAVAILABLE
+  SOLD
+}
+
+model DealershipInfo {
+  id            String      @id @default(uuid())
+  name          String      @default("AutoSphere Dealership")
+  address       String      @default("123 Main St, City, Country")
+  phone         String      @default("+1 234 567 890")
+  email         String      @default("dealership-email@example.com")
+  workingHours  workingHours[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model workingHours {
+  id              String    @id @default(uuid())
+  dealerShipId    String
+  dealerShip      DealershipInfo @relation(fields: [dealerShipId], references: [id], onDelete: Cascade)
+  dayOfWeek       DayOfWeek
+  openTime        String     // format 24 hours
+  closeTime       String     // format 24 hours
+  isOpen          Boolean    @default(true)
+  createAt        DateTime    @default(now())
+  updateAt        DateTime    @updatedAt
+
+  @@unique([dealerShipId, dayOfWeek])
+  @@index([dealerShipId])
+  @@index([dayOfWeek])
+  @@index([isOpen])
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model UserSavedCars {
+  id         String       @id @default(uuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  carId      String
+  car        Car          @relation(fields: [carId], references: [id], onDelete: Cascade)
+  savedAt    DateTime     @default(now())
+
+  @@unique([userId, carId])
+  @@index([userId])
+  @@index([carId])
+}
+
+model TestDriveBooking {
+  id           String        @id @default(uuid())
+  carId        String
+  car          Car           @relation(fields: [carId], references: [id])
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  bookingDate  DateTime      @db.Date
+  startTime    String        // format 24 hours
+  endTime      String        // format 24 hours
+  status       BookingStatus @default(PENDING)
+  notes        String?       
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([carId])
+  @@index([userId])
+  @@index([bookingDate])
+  @@index([status])
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+}
