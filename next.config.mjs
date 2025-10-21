@@ -1,5 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    experimental: {
+        serverComponentsHmrCache: false, // Disable RSC HMR cache, default is true
+    },
+
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "toaweximwzhhisbfnmrf.supabase.co"
+            },
+        ],
+    },
+
     async headers(){
         return [
             {
