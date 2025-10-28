@@ -1,3 +1,5 @@
+"use server"
+
 // logic for admin related cars page 
 // scanning the image with the AI with the Gemini API
 

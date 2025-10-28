@@ -27,9 +27,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDropzone } from 'react-dropzone';
 import { toast } from 'sonner';
-import { Upload, X } from 'lucide-react';
+import { Loader2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import { addCar } from '@/actions/cars';
+import useFetch from '@/hooks/use-fetch';
 
 // Predefined options
 const fuelTypes = ["Petrol", "Diesel", "Electric", "Hybrid", "Plug-in Hybrid"];
@@ -98,6 +100,8 @@ const AddCarForm = () => {
       featured: false,
     },
   });
+
+  const { data: addCarResult, loading:addCarLoading, fn:addCarfn,} = useFetch(addCar)
 
   const onSubmit = async(data)=>{
     if (uploadingImages.length === 0) {
@@ -396,6 +400,10 @@ const AddCarForm = () => {
                     </div>
                   </div>
                 )}
+
+                <Button type="submit" className="w-full md:w-auto"
+                  disabled={addCarLoading}
+                >{true ? <> <Loader2 className='mr-2 h-4 w-4 animate-spin' />Adding Car...</> : "Add Car"}</Button>
               </form>
             </CardContent>
           </Card>
