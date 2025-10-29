@@ -1,5 +1,6 @@
 "use server"
 
+import { serializeCarData } from "@/lib/helper";
 // logic for admin related cars page 
 // scanning the image with the AI with the Gemini API
 
@@ -9,6 +10,8 @@ import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { v4 as uuidv4 } from "uuid";
+import { file, success } from "zod";
 
 // Function to convert file to base64
 async function fileToBase64(file){
@@ -24,15 +27,18 @@ export async function processCarImageWithAI(file){
             throw new Error("GEMINI_API_KEY is not set in environment variables");
         }
 
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({model: "gemini-1.5-flash"});
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    // Allow overriding the model via env var if the account/endpoint doesn't support the default
+    // Default to the newer requested model
+    const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash-exp";
+    const model = genAI.getGenerativeModel({ model: modelName });
 
         const base64Image = await fileToBase64(file);
 
         // now will send this base64 to the Gemini API for processing
         const imagePart ={
             inlineData:{
-                dat: base64Image,
+                data: base64Image,
                 mimeType: file.type,
             },
         }
@@ -102,7 +108,13 @@ export async function processCarImageWithAI(file){
             };
         }
     }catch(error){
-        throw new Error("Gemini API error: " + error.message);
+        // Provide a clearer hint when model is not found or not supported for generateContent
+        const rawMsg = error?.message || String(error);
+        let hint = rawMsg;
+        if (/not found/i.test(rawMsg) || /is not found/i.test(rawMsg) || /not supported/i.test(rawMsg)){
+            hint = `${rawMsg}. This usually means the chosen model (${process.env.GEMINI_MODEL || 'gemini-1.5-flash'}) is not available for your API version or doesn't support generateContent. Try setting GEMINI_MODEL to a supported model or call ListModels to see available models for your account.`;
+        }
+        throw new Error("Gemini API error: " + hint);
     }
 }
 
@@ -192,4 +204,143 @@ export async function addCar({carData, images}){
     }catch(error){
         throw new Error("Error adding car:" + error.message);
     }
+}
+
+export async function getCars(search = ""){
+    try {
+        const { userId } = await auth();
+        if(!userId) throw new Error("Unauthorized");
+        
+        const user = await db.user.findUnique({
+            where: {clerkUserId: userId},
+        });
+
+        if(!user) throw new Error("User not found");
+
+        let where = {};
+
+        if(search){
+            where.OR = [
+                { make: { contains: search, mode: "insensitive" } },
+                { model: { contains: search, mode: "insensitive" } },
+                { color: { contains: search, mode: "insensitive" } },
+            ]
+        }
+
+        const cars = await db.car.findMany({
+            where,
+            orderBy: { createdAt: "desc" },
+        });
+
+        const serializedCars = cars.map(serializeCarData);
+
+        return {
+            success: true,
+            data: serializedCars,
+        }
+    } catch(e){
+        console.log("Error fetching cars:", e);
+        return {
+            success: false,
+            error: "Failed to fetch cars",
+        }
+    }
+}
+
+export async function deleteCar(id){
+    try{
+    const { userId } = await auth();
+    if(!userId) throw new Error("Unauthorized");
+    
+    const user = await db.user.findUnique({
+        where: {clerkUserId: userId},
+    });
+
+    if(!user) throw new Error("User not found");
+
+    const car = await db.car.findUnique({
+        where: {id},
+        select: {images: true},
+    });
+
+    if(!car){
+        return {
+            success: false,
+            error: "Car not found",
+        };
+    }
+
+    await db.car.delete({
+        where: {id},
+    });
+
+    try{
+        const cookiesStore = await cookies();
+        const supabase = createClient(cookiesStore);
+
+        const filePaths = car.images.map((imageUrl)=>{
+            const url = new URL(imageUrl);
+            const pathMatch = url.pathname.match(/\/car-images\/(.*)/);
+            return pathMatch ? pathMatch[1] : null; // Extract the path after /car-images/
+        }).filter(Boolean)
+
+        if(filePaths.length > 0){
+            const { error } = await supabase.storage
+            .from("car-images").remove(filePaths);
+            if(error){
+                console.error("Error deleting car images:", error);
+            }
+        }
+    }catch(storageError){  
+        console.error("Error deleting car images:", storageError);
+    }
+    revalidatePath("/admin/cars");
+    return {
+        success: true,
+    };
+    }catch(e){
+        console.error("Error deleting car:", e);
+        return {
+            success: false,
+            error: "Failed to delete car",
+        }
+    }
+}
+
+export async function updateCarStatus(id, { status, featured }){
+
+    try{
+        const { userId } = await auth();
+        if(!userId) throw new Error("Unauthorized");
+
+        const user = await db.user.findUnique({
+            where: {clerkUserId: userId},
+        });
+
+        if(!user) throw new Error("User not found");
+
+        const updateData = {};
+
+        if(status !== undefined){
+            updateData.status = status;
+        }
+
+        if(featured !== undefined){
+            updateData.featured = featured;
+        }
+
+        // Update the car 
+        await db.car.update({
+            where: {id},
+            data: updateData,
+        });
+
+        revalidatePath("/admin/cars");
+        return { success: true  };
+
+    }catch(e){
+        console.error("Error updating car status:", e);
+        return { success: false, error: "Failed to update car status" };
+    }
+    
 }
