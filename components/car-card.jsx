@@ -7,11 +7,25 @@ import { CarIcon, Heart } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { useRouter } from 'next/navigation';
+import useFetch from '@/hooks/use-fetch';
+import { toggleSavedCar } from '@/actions/car-listing';
+import { useAuth } from '@clerk/clerk-react';
 
 const CarCard = ({car}) => {
 const [isSaved, setIsSaved] = useState(car.wishlisted);
 const router = useRouter();
+
+useAuth();
+
+const {
+    loading: isToggling,
+    fn: toggleSavedCarFn,
+    data: toggleResult,
+    error: toggleError,
+} = useFetch(toggleSavedCar);
+
 const handleToggleSave = async(e)=>{
+    e.preventDefault();
 
 }
   return (
