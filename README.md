@@ -105,15 +105,6 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-##  Deployment
-
-### Vercel
-
-1. Push to GitHub
-2. Import repository on Vercel
-3. Add environment variables
-4. Deploy
-
 ##  Project Structure
 
 ```
@@ -145,15 +136,4 @@ npm run start        # Start server
 npm run lint         # Lint code
 ```
 
-##  Author
-
-**Abhishek Goyal**
-- GitHub: [@Abhishekgoyal007](https://github.com/Abhishekgoyal007)
-
-##  License
-
-MIT License
-
----
-
-Made with  by Abhishek Goyal
+Made by Abhishek Goyal
