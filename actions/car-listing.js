@@ -340,8 +340,8 @@ export async function getCarById(carId) {
                 updatedAt: dealership.updatedAt.toISOString(),
                 workingHours: dealership.workingHours.map((hour) => ({
                   ...hour,
-                  createdAt: hour.createdAt.toISOString(),
-                  updatedAt: hour.updatedAt.toISOString(),
+                  createAt: hour.createAt.toISOString(),
+                  updateAt: hour.updateAt.toISOString(),
                 })),
               }
             : null,
