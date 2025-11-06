@@ -1,18 +1,7 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 
-
-// protecting the private routes
-const isProtectedRoute = createRouteMatcher([
-    "/admin(.*)",
-    "/saved-cars(.*)",
-    "/reservations(.*)",
-])
-
-export default clerkMiddleware((auth, req)=>{
-    if(isProtectedRoute(req)){
-        auth().protect();
-    }
-});
+// Use clerkMiddleware without protection - we'll handle auth in individual pages
+export default clerkMiddleware();
 
 export const config = {
   matcher: [
