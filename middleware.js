@@ -1,7 +1,8 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
+import { updateSession } from './lib/supabase/middleware'
 
-// Use clerkMiddleware without protection - we'll handle auth in individual pages
-export default clerkMiddleware();
+export async function middleware(request) {
+  return await updateSession(request)
+}
 
 export const config = {
   matcher: [
@@ -10,4 +11,4 @@ export const config = {
     // Always run for API routes
     '/(api|trpc)(.*)',
   ],
-};
+}

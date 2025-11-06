@@ -6,7 +6,7 @@ import { serializeCarData } from "@/lib/helper";
 
 import { db } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/auth";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";

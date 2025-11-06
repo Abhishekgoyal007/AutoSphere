@@ -1,5 +1,5 @@
 import { getUserTestDrives } from "@/actions/test-drive";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { ReservationsList } from "./_components/reservations-list";
 
@@ -10,8 +10,8 @@ export const metadata = {
 
 export default async function ReservationsPage() {
   // Check authentication on server
-  const { userId } = await auth();
-  if (!userId) {
+  const user = await getAuthUser();
+  if (!user) {
     redirect("/sign-in?redirect=/reservations");
   }
 

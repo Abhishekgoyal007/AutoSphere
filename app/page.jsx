@@ -6,7 +6,6 @@ import { bodyTypes, carMakes, faqItems } from '@/lib/data';
 import Image from "next/image";
 import Link from "next/link";
 import { AccordionContent, AccordionTrigger, Accordion, AccordionItem } from "@/components/ui/accordion";
-import { SignedOut } from "@clerk/nextjs";
 import { getFeaturedCars } from "@/actions/home";
 
 export default async function Home() {
@@ -170,11 +169,9 @@ export default async function Home() {
             <Button size="lg" variant="secondary" asChild>
               <Link href="/cars">View All Cars</Link>
             </Button>
-            <SignedOut>
-              <Button size="lg" asChild>
-                <Link href="/sign-up">Sign Up Now</Link>
-              </Button>
-            </SignedOut>
+            <Button size="lg" asChild>
+              <Link href="/sign-up">Sign Up Now</Link>
+            </Button>
           </div>
         </div>
       </section>

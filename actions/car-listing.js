@@ -2,7 +2,7 @@
 
 import { serializeCarData } from "@/lib/helper";
 import { db } from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function getCarFilters() {
@@ -85,12 +85,12 @@ export async function getCars({
 }) {
   try {
     // Get current user if authenticated
-    const { userId } = await auth();
+    const user = await getAuthUser();
     let dbUser = null;
 
-    if (userId) {
+    if (user) {
       dbUser = await db.user.findUnique({
-        where: { clerkUserId: userId },
+        where: { clerkUserId: user.id },
       });
     }
 
@@ -187,11 +187,11 @@ export async function getCars({
  */
 export async function toggleSavedCar(carId) {
   try {
-    const { userId } = await auth();
-    if (!userId) throw new Error("Unauthorized");
+    const authUser = await getAuthUser();
+    if (!authUser) throw new Error("Unauthorized");
 
     const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { clerkUserId: authUser.id },
     });
 
     if (!user) throw new Error("User not found");
@@ -262,7 +262,7 @@ export async function toggleSavedCar(carId) {
 export async function getCarById(carId) {
   try {
     // Get current user if authenticated
-    const { userId } = await auth();
+    const authUser = await getAuthUser(); const userId = authUser?.id;
     let dbUser = null;
 
     if (userId) {
@@ -358,7 +358,7 @@ export async function getCarById(carId) {
  */
 export async function getSavedCars() {
   try {
-    const { userId } = await auth();
+    const authUser = await getAuthUser(); const userId = authUser?.id;
     if (!userId) {
       return {
         success: false,
