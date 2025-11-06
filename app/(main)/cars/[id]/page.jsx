@@ -1,5 +1,4 @@
 import { getCarById } from '@/actions/car-listing';
-import { de } from 'date-fns/locale';
 import { notFound } from 'next/navigation';
 import React from 'react'
 import { CarDetails } from './_components/car-details';
