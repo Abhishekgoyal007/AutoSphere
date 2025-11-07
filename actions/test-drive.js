@@ -17,12 +17,13 @@ export async function bookTestDrive({
 }) {
   try {
     // Authenticate user
-    const { userId } = await auth();
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     if (!userId) throw new Error("You must be logged in to book a test drive");
 
     // Find user in our database
     const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { authUserId: userId },
     });
 
     if (!user) throw new Error("User not found in database");
@@ -85,7 +86,8 @@ export async function bookTestDrive({
  */
 export async function getUserTestDrives() {
   try {
-    const { userId } = await auth();
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     if (!userId) {
       return {
         success: false,
@@ -95,7 +97,7 @@ export async function getUserTestDrives() {
 
     // Get the user from our database
     const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { authUserId: userId },
     });
 
     if (!user) {
@@ -146,7 +148,8 @@ export async function getUserTestDrives() {
  */
 export async function cancelTestDrive(bookingId) {
   try {
-    const { userId } = await auth();
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     if (!userId) {
       return {
         success: false,
@@ -156,7 +159,7 @@ export async function cancelTestDrive(bookingId) {
 
     // Get the user from our database
     const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { authUserId: userId },
     });
 
     if (!user) {
@@ -223,3 +226,4 @@ export async function cancelTestDrive(bookingId) {
     };
   }
 }
+

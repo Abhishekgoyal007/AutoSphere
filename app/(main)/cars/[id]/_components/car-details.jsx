@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useAuth } from "@clerk/nextjs";
+import { createClient } from "@/lib/supabase/client";
 import { AlertCircle, Calendar } from "lucide-react";
 import {
   Car,
@@ -35,9 +35,25 @@ import EmiCalculator from "./emi-calculator";
 
 export function CarDetails({ car, testDriveInfo }) {
   const router = useRouter();
-  const { isSignedIn } = useAuth();
+  const supabase = createClient();
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(car.wishlisted);
+
+  // Check if user is signed in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsSignedIn(!!user);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsSignedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
 
   const {
     loading: savingCar,
@@ -81,7 +97,7 @@ export function CarDetails({ car, testDriveInfo }) {
       navigator
         .share({
           title: `${car.year} ${car.make} ${car.model}`,
-          text: `Check out this ${car.year} ${car.make} ${car.model} on Vehiql!`,
+          text: `Check out this ${car.year} ${car.make} ${car.model} on AutoSphere!`,
           url: window.location.href,
         })
         .catch((error) => {
@@ -234,7 +250,7 @@ export function CarDetails({ car, testDriveInfo }) {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Vehiql Car Loan Calculator</DialogTitle>
+                <DialogTitle>AutoSphere Car Loan Calculator</DialogTitle>
                 <EmiCalculator price={car.price} />
               </DialogHeader>
             </DialogContent>
@@ -251,7 +267,7 @@ export function CarDetails({ car, testDriveInfo }) {
                 Our representatives are available to answer all your queries
                 about this vehicle.
               </p>
-              <a href="mailto:help@vehiql.in">
+              <a href="mailto:help@autosphere.com">
                 <Button variant="outline" className="w-full">
                   Request Info
                 </Button>
@@ -384,7 +400,7 @@ export function CarDetails({ car, testDriveInfo }) {
             <div className="flex items-start gap-3">
               <LocateFixed className="h-5 w-5 text-blue-600 mt-1 flex-shrink-0" />
               <div>
-                <h4 className="font-medium">Vehiql Motors</h4>
+                <h4 className="font-medium">AutoSphere Motors</h4>
                 <p className="text-gray-600">
                   {testDriveInfo.dealership?.address || "Not Available"}
                 </p>

@@ -40,7 +40,7 @@ AutoSphere is a full-stack Next.js application for car dealerships, featuring AI
 - **Next.js Server Actions** - API endpoints
 - **Prisma** - ORM for database access
 - **PostgreSQL** - Database (via Supabase)
-- **Clerk** - Authentication & user management
+- **Supabase Auth** - Authentication & user management
 
 ### AI & Services
 - **Google Gemini 2.0 Flash** - AI image analysis
@@ -53,8 +53,7 @@ AutoSphere is a full-stack Next.js application for car dealerships, featuring AI
 ### Prerequisites
 - Node.js 18+ 
 - npm or yarn
-- PostgreSQL database (or Supabase account)
-- Clerk account
+- Supabase account (for database and auth)
 - Google Gemini API key
 - Arcjet API key
 
@@ -75,13 +74,11 @@ npm install
 
 **3. Set up environment variables**
 
-Create a `.env` file:
+Create a `.env.local` file:
 
 ```env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_key
-CLERK_SECRET_KEY=your_key
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 DATABASE_URL=postgresql://user:password@host:6543/database?pgbouncer=true
 DIRECT_URL=postgresql://user:password@host:5432/database
@@ -121,7 +118,7 @@ autosphere/
 
 ##  Security
 
-- Clerk authentication
+- Supabase authentication
 - Arcjet rate limiting
 - Prisma ORM
 - Environment variables

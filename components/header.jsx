@@ -28,10 +28,17 @@ const Header = ({isAdminPage=false}) => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
       
-      // Check if user is admin (you'll need to add this logic based on your needs)
-      // For now, checking if email matches or if there's a user_metadata field
-      if (user?.user_metadata?.role === 'ADMIN' || user?.email === 'your-admin-email@example.com') {
-        setIsAdmin(true)
+      // Check if user is admin from database
+      if (user) {
+        try {
+          const response = await fetch('/api/check-admin')
+          const data = await response.json()
+          if (data.isAdmin) {
+            setIsAdmin(true)
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error)
+        }
       }
       
       setLoading(false)
@@ -41,6 +48,9 @@ const Header = ({isAdminPage=false}) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      if (!session?.user) {
+        setIsAdmin(false)
+      }
     })
 
     return () => subscription.unsubscribe()

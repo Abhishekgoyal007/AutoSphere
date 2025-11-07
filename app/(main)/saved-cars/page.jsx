@@ -4,7 +4,7 @@ import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Saved Cars | Vehiql",
+  title: "Saved Cars | AutoSphere",
   description: "View your saved cars and favorites",
 };
 

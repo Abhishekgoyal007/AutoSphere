@@ -9,14 +9,29 @@ import { Badge } from './ui/badge';
 import { useRouter } from 'next/navigation';
 import useFetch from '@/hooks/use-fetch';
 import { toggleSavedCar } from '@/actions/car-listing';
-import { useAuth } from '@clerk/clerk-react';
+import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
 
 const CarCard = ({car}) => {
 const [isSaved, setIsSaved] = useState(car.wishlisted);
+const [isSignedIn, setIsSignedIn] = useState(false);
 const router = useRouter();
+const supabase = createClient();
 
-const { isSignedIn } = useAuth();
+// Check if user is signed in
+useEffect(() => {
+    const checkAuth = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setIsSignedIn(!!user);
+    };
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsSignedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+}, [supabase]);
 
 const {
     loading: isToggling,

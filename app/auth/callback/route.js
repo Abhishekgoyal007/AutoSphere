@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { checkUser } from '@/lib/checkUser'
 
 export async function GET(request) {
   const { searchParams, origin } = new URL(request.url)
@@ -11,6 +12,9 @@ export async function GET(request) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // Create or update user in database after successful auth
+      await checkUser()
+      
       const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
       const isLocalEnv = process.env.NODE_ENV === 'development'
       if (isLocalEnv) {

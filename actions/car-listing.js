@@ -90,7 +90,7 @@ export async function getCars({
 
     if (user) {
       dbUser = await db.user.findUnique({
-        where: { clerkUserId: user.id },
+        where: { authUserId: user.id },
       });
     }
 
@@ -191,7 +191,7 @@ export async function toggleSavedCar(carId) {
     if (!authUser) throw new Error("Unauthorized");
 
     const user = await db.user.findUnique({
-      where: { clerkUserId: authUser.id },
+      where: { authUserId: authUser.id },
     });
 
     if (!user) throw new Error("User not found");
@@ -262,12 +262,13 @@ export async function toggleSavedCar(carId) {
 export async function getCarById(carId) {
   try {
     // Get current user if authenticated
-    const authUser = await getAuthUser(); const userId = authUser?.id;
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     let dbUser = null;
 
     if (userId) {
       dbUser = await db.user.findUnique({
-        where: { clerkUserId: userId },
+        where: { authUserId: userId },
       });
     }
 
@@ -299,25 +300,27 @@ export async function getCarById(carId) {
     }
 
     // Check if user has already booked a test drive for this car
-    const existingTestDrive = await db.testDriveBooking.findFirst({
-      where: {
-        carId,
-        userId: dbUser.id,
-        status: { in: ["PENDING", "CONFIRMED", "COMPLETED"] },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
     let userTestDrive = null;
+    
+    if (dbUser) {
+      const existingTestDrive = await db.testDriveBooking.findFirst({
+        where: {
+          carId,
+          userId: dbUser.id,
+          status: { in: ["PENDING", "CONFIRMED", "COMPLETED"] },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
 
-    if (existingTestDrive) {
-      userTestDrive = {
-        id: existingTestDrive.id,
-        status: existingTestDrive.status,
-        bookingDate: existingTestDrive.bookingDate.toISOString(),
-      };
+      if (existingTestDrive) {
+        userTestDrive = {
+          id: existingTestDrive.id,
+          status: existingTestDrive.status,
+          bookingDate: existingTestDrive.bookingDate.toISOString(),
+        };
+      }
     }
 
     // Get dealership info for test drive availability
@@ -358,7 +361,8 @@ export async function getCarById(carId) {
  */
 export async function getSavedCars() {
   try {
-    const authUser = await getAuthUser(); const userId = authUser?.id;
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     if (!userId) {
       return {
         success: false,
@@ -368,7 +372,7 @@ export async function getSavedCars() {
 
     // Get the user from our database
     const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { authUserId: userId },
     });
 
     if (!user) {

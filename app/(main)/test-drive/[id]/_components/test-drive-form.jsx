@@ -91,22 +91,27 @@ export function TestDriveForm({ car, testDriveInfo }) {
 
   // Handle successful booking
   useEffect(() => {
-    if (bookingResult?.success) {
-      setBookingDetails({
-        date: format(bookingResult?.data?.bookingDate, "EEEE, MMMM d, yyyy"),
-        timeSlot: `${format(
-          parseISO(`2022-01-01T${bookingResult?.data?.startTime}`),
-          "h:mm a"
-        )} - ${format(
-          parseISO(`2022-01-01T${bookingResult?.data?.endTime}`),
-          "h:mm a"
-        )}`,
-        notes: bookingResult?.data?.notes,
-      });
-      setShowConfirmation(true);
+    if (bookingResult) {
+      if (bookingResult.success) {
+        setBookingDetails({
+          date: format(bookingResult?.data?.bookingDate, "EEEE, MMMM d, yyyy"),
+          timeSlot: `${format(
+            parseISO(`2022-01-01T${bookingResult?.data?.startTime}`),
+            "h:mm a"
+          )} - ${format(
+            parseISO(`2022-01-01T${bookingResult?.data?.endTime}`),
+            "h:mm a"
+          )}`,
+          notes: bookingResult?.data?.notes,
+        });
+        setShowConfirmation(true);
 
-      // Reset form
-      reset();
+        // Reset form
+        reset();
+      } else if (bookingResult.error) {
+        // Handle error returned from server action
+        toast.error(bookingResult.error);
+      }
     }
   }, [bookingResult, reset]);
 
@@ -278,7 +283,7 @@ export function TestDriveForm({ car, testDriveInfo }) {
             <h2 className="text-xl font-bold mb-4">Dealership Info</h2>
             <div className="text-sm">
               <p className="font-medium">
-                {dealership?.name || "Vehiql Motors"}
+                {dealership?.name || "AutoSphere Motors"}
               </p>
               <p className="text-gray-600 mt-1">
                 {dealership?.address || "Address not available"}
@@ -483,7 +488,7 @@ export function TestDriveForm({ car, testDriveInfo }) {
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium">Dealership:</span>
-                  <span>{dealership?.name || "Vehiql Motors"}</span>
+                  <span>{dealership?.name || "AutoSphere Motors"}</span>
                 </div>
               </div>
 

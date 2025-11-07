@@ -201,13 +201,13 @@ export const SettingsForm = () => {
   // Make user admin
   const handleMakeAdmin = async () => {
     if (!userToPromote) return;
-    await updateRole(userToPromote.clerkUserId, "ADMIN");
+    await updateRole(userToPromote.authUserId, "ADMIN");
   };
 
   // Remove admin privileges
   const handleRemoveAdmin = async () => {
     if (!userToDemote) return;
-    await updateRole(userToDemote.clerkUserId, "USER");
+    await updateRole(userToDemote.authUserId, "USER");
   };
 
   // Filter users by search term

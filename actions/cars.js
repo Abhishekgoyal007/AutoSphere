@@ -121,11 +121,12 @@ export async function processCarImageWithAI(file){
 
 export async function addCar({carData, images}){
     try {
-        const { userId } = await auth();
+        const authUser = await getAuthUser();
+    const userId = authUser?.id;
         if(!userId) throw new Error("Unauthorized");
 
         const user = await db.user.findUnique({
-            where: {clerkUserId: userId},
+            where: {authUserId: userId},
         });
 
         if (!user) throw new Error("User not found");
@@ -208,11 +209,12 @@ export async function addCar({carData, images}){
 
 export async function getCars(search = ""){
     try {
-        const { userId } = await auth();
+        const authUser = await getAuthUser();
+    const userId = authUser?.id;
         if(!userId) throw new Error("Unauthorized");
         
         const user = await db.user.findUnique({
-            where: {clerkUserId: userId},
+            where: {authUserId: userId},
         });
 
         if(!user) throw new Error("User not found");
@@ -249,11 +251,12 @@ export async function getCars(search = ""){
 
 export async function deleteCar(id){
     try{
-    const { userId } = await auth();
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     if(!userId) throw new Error("Unauthorized");
     
     const user = await db.user.findUnique({
-        where: {clerkUserId: userId},
+        where: {authUserId: userId},
     });
 
     if(!user) throw new Error("User not found");
@@ -310,11 +313,12 @@ export async function deleteCar(id){
 export async function updateCarStatus(id, { status, featured }){
 
     try{
-        const { userId } = await auth();
+        const authUser = await getAuthUser();
+    const userId = authUser?.id;
         if(!userId) throw new Error("Unauthorized");
 
         const user = await db.user.findUnique({
-            where: {clerkUserId: userId},
+            where: {authUserId: userId},
         });
 
         if(!user) throw new Error("User not found");
@@ -344,3 +348,4 @@ export async function updateCarStatus(id, { status, featured }){
     }
     
 }
+

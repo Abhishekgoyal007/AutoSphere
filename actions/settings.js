@@ -6,11 +6,12 @@ import { revalidatePath } from "next/cache";
 
 export async function getDealershipInfo(){
     try{
-        const { userId } = await auth();
+        const authUser = await getAuthUser();
+    const userId = authUser?.id;
         if(!userId) throw new Error("Unauthorized");
 
         const user = await db.user.findUnique({
-            where: {clerkUserId: userId},
+            where: {authUserId: userId},
         });
 
         if(!user) throw new Error("User not found");
@@ -62,11 +63,12 @@ export async function getDealershipInfo(){
 
 export async function saveWorkingHours(workingHours) {
     try{
-        const {userId} = await auth();
+        const authUser = await getAuthUser();
+        const userId = authUser?.id;
         if(!userId) throw new Error("Unauthorized");
 
         const user = await db.user.findUnique({
-            where: {clerkUserId: userId},
+            where: {authUserId: userId},
         });
 
         if(!user || user.role !== "ADMIN"){
@@ -110,11 +112,12 @@ export async function saveWorkingHours(workingHours) {
 
 export async function getUsers() {
     try{
-        const {userId} = await auth();
+        const authUser = await getAuthUser();
+        const userId = authUser?.id;
         if(!userId) throw new Error("Unauthorized");
 
         const user = await db.user.findUnique({
-            where: {clerkUserId: userId},
+            where: {authUserId: userId},
         });
 
         if(!user || user.role !== "ADMIN"){
@@ -141,19 +144,20 @@ export async function getUsers() {
     }
 }
 
-export async function updateUserRole(clerkUserId, role) {
+export async function updateUserRole(authUserId, role) {
     try{
-        const {userId: adminId} = await auth();
+        const authUser = await getAuthUser();
+        const adminId = authUser?.id;
         if(!adminId) throw new Error("Unauthorized");
         const user = await db.user.findUnique({
-            where: {clerkUserId: adminId},
+            where: {authUserId: adminId},
         });
         if(!user || user.role !== "ADMIN"){
             throw new Error("Unauthorized: Admin access required");
         }
-        // Update the target user's role by their clerkUserId
+        // Update the target user's role by their authUserId
         const updated = await db.user.update({
-            where: { clerkUserId },
+            where: { authUserId },
             data: { role },
         });
         revalidatePath('/admin/settings');
@@ -164,3 +168,4 @@ export async function updateUserRole(clerkUserId, role) {
         throw new Error("Error updating user role: " + err.message);
     }
 }
+

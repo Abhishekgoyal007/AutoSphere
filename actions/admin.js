@@ -6,11 +6,12 @@ import { getAuthUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export async function getAdmin() {
-  const { userId } = await auth();
+  const authUser = await getAuthUser();
+    const userId = authUser?.id;
   if (!userId) throw new Error("Unauthorized");
 
   const user = await db.user.findUnique({
-    where: { clerkUserId: userId },
+    where: { authUserId: userId },
   });
 
   // If user not found in our db or not an admin, return not authorized
@@ -26,12 +27,13 @@ export async function getAdmin() {
  */
 export async function getAdminTestDrives({ search = "", status = "" }) {
   try {
-    const { userId } = await auth();
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     if (!userId) throw new Error("Unauthorized");
 
     // Verify admin status
     const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { authUserId: userId },
     });
 
     if (!user || user.role !== "ADMIN") {
@@ -120,12 +122,13 @@ export async function getAdminTestDrives({ search = "", status = "" }) {
  */
 export async function updateTestDriveStatus(bookingId, newStatus) {
   try {
-    const { userId } = await auth();
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     if (!userId) throw new Error("Unauthorized");
 
     // Verify admin status
     const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { authUserId: userId },
     });
 
     if (!user || user.role !== "ADMIN") {
@@ -177,12 +180,13 @@ export async function updateTestDriveStatus(bookingId, newStatus) {
 
 export async function getDashboardData() {
   try {
-    const { userId } = await auth();
+    const authUser = await getAuthUser();
+    const userId = authUser?.id;
     if (!userId) throw new Error("Unauthorized");
 
     // Get user
     const user = await db.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { authUserId: userId },
     });
 
     if (!user || user.role !== "ADMIN") {
@@ -286,3 +290,4 @@ export async function getDashboardData() {
     };
   }
 }
+
