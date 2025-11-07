@@ -6,6 +6,9 @@ export const metadata = {
   description: "Admin dashboard for AutoSphere car marketplace",
 };
 
+// Force dynamic rendering for admin pages
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage() {
   // Fetch dashboard data
   const dashboardData = await getDashboardData();

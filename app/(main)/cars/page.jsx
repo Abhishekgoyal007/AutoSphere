@@ -9,6 +9,9 @@ export const metadata = {
     description: "Explore our extensive collection of cars at AutoSphere. Find your perfect vehicle from a wide range of makes and models.",
 }
 
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic';
+
 const CarsPage = async () => {
     const filtersData = await getCarFilters();
 
