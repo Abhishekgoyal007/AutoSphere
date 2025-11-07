@@ -1,7 +1,8 @@
 import { getCarFilters } from '@/actions/car-listing';
-import React from 'react'
+import React, { Suspense } from 'react'
 import { CarFilters } from './_components/cars-filters';
 import { CarListings } from './_components/car-listings';
+import CarListingsLoading from './_components/car-listing-loading';
 
 export const metadata = {
     title: "Cars | AutoSphere",
@@ -21,7 +22,9 @@ const CarsPage = async () => {
             </div>
             <div className='flex-1'>
                 {/* Listing */}
-                <CarListings />
+                <Suspense fallback={<CarListingsLoading />}>
+                    <CarListings />
+                </Suspense>
             </div>
         </div>
     </div>
