@@ -1,4 +1,4 @@
-﻿#  AutoSphere - Modern Car Dealership Platform
+ ﻿#  AutoSphere - Modern Car Dealership Platform
 
 AutoSphere is a full-stack Next.js application for car dealerships, featuring AI-powered car recognition, test drive booking, and comprehensive admin management.
 
