@@ -30,7 +30,7 @@ export async function processCarImageWithAI(file) {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         // Allow overriding the model via env var if the account/endpoint doesn't support the default
         // Default to the newer requested model
-        const modelName = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+        const modelName = process.env.GEMINI_MODEL || "gemini-2.0-flash";
         const model = genAI.getGenerativeModel({ model: modelName });
 
         const base64Image = await fileToBase64(file);
